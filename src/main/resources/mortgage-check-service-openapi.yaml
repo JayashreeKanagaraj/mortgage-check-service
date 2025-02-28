@@ -1,0 +1,115 @@
+openapi: 3.0.0
+info:
+  title: Mortgage Check API
+  description: API for managing mortgage interest rates and loan approvals
+  version: '1.0'
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
+paths:
+  /api/mortgage-check:
+    post:
+      tags:
+        - mortgage-check-controller
+      summary: Check mortgage feasibility
+      description: >-
+        Validates if the requested mortgage is feasible based on income, home
+        value, and loan amount.
+      operationId: processMortgageCheck
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MortgageCheckRequest'
+        required: true
+      responses:
+        '200':
+          description: Mortgage check successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MortgageCheckResponse'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MortgageCheckResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MortgageCheckResponse'
+  /api/interest-rates:
+    get:
+      tags:
+        - interest-rate-controller
+      summary: Get available interest rates
+      description: >-
+        Returns a list of interest rates with maturity periods and last update
+        timestamps.
+      operationId: getInterestRates
+      responses:
+        '200':
+          description: Successfully retrieved interest rates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterestRateResponse'
+        '404':
+          description: No interest rates available
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InterestRateResponse'
+        '500':
+          description: Internal server error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InterestRateResponse'
+components:
+  schemas:
+    MortgageCheckRequest:
+      type: object
+      properties:
+        income:
+          type: number
+          minimum: 0.01
+        maturityPeriod:
+          type: integer
+          format: int32
+          minimum: 1
+        loanValue:
+          type: number
+          minimum: 0.01
+        homeValue:
+          type: number
+          minimum: 0.01
+      required:
+        - homeValue
+        - income
+        - loanValue
+    MortgageCheckResponse:
+      type: object
+      properties:
+        feasible:
+          type: boolean
+        monthlyCost:
+          type: number
+    InterestRateResponse:
+      type: object
+      properties:
+        maturityPeriod:
+          type: integer
+          format: int32
+        interestRate:
+          type: number
+        lastUpdate:
+          type: string
+          format: date-time
